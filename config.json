@@ -1,0 +1,22 @@
+{
+    "debug": false,
+    "kafka_url": "",
+    "device_repository_url": "http://api.device-repository:8080",
+    "device_selection_url": "http://api.device-selection:8080",
+    "val_key_url": "",
+    "notification_url": "http://api.notifier:5000",
+    "notification_topic": "analytics",
+    "notifications_ignore_duplicates_within_seconds": 86400,
+    "mongo_url": "",
+    "mongo_table": "anomaly_detection",
+    "mongo_anomaly_collection": "anomalies",
+    "cache_duration": "10m",
+    "cache_invalidation_kafka_topics": [
+        "devices",
+        "device-types",
+        "aspects",
+        "concepts",
+        "characteristics"
+    ],
+    "anomaly_detector_attribute": "anomaly-detector"
+}
