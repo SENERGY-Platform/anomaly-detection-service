@@ -16,6 +16,8 @@
 
 package handler
 
+import "log"
+
 func init() {
 	//the example handler will be ignored because bufferSize is 0
 	Registry.Register("example", "function-id", "aspect-id", "characteristic-id", 0, ExampleHandler{})
@@ -24,5 +26,10 @@ func init() {
 type ExampleHandler struct{}
 
 func (this ExampleHandler) Handle(values []interface{}) (anomaly bool, description string, err error) {
+	castValues, err := CastList[float64](values)
+	if err != nil {
+		return false, "", err
+	}
+	log.Println("example", castValues)
 	return false, "", nil
 }
