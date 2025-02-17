@@ -24,6 +24,7 @@ import (
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
 	"github.com/valkey-io/valkey-go"
 	"math/rand"
+	"slices"
 	"time"
 )
 
@@ -45,14 +46,14 @@ func (this *HandlerInfo) storeAndListValues(handlerName string, deviceId string,
 	//trim the list
 	//on average on every 5th call
 	if rand.Int()%5 == 0 {
-		err = this.valKeyClient.Do(ctx, this.valKeyClient.B().Ltrim().Key(key).Start(int64(-size)).Stop(-1).Build()).Error()
+		err = this.valKeyClient.Do(ctx, this.valKeyClient.B().Ltrim().Key(key).Start(0).Stop(int64(size-1)).Build()).Error()
 		if err != nil {
 			return nil, errors.Join(fmt.Errorf("unable to trim store: %w", err), model.ErrWithRetry)
 		}
 	}
 
 	//get list
-	resp := this.valKeyClient.Do(ctx, this.valKeyClient.B().Lrange().Key(key).Start(int64(-size)).Stop(-1).Build())
+	resp := this.valKeyClient.Do(ctx, this.valKeyClient.B().Lrange().Key(key).Start(0).Stop(int64(size-1)).Build())
 	err = resp.Error()
 	if err != nil {
 		return nil, errors.Join(fmt.Errorf("unable to get value list from store: %w", err), model.ErrWithRetry)
@@ -61,5 +62,6 @@ func (this *HandlerInfo) storeAndListValues(handlerName string, deviceId string,
 	if err != nil {
 		return nil, errors.Join(fmt.Errorf("unable to unmarshal list from store: %w", err), model.ErrWillBeIgnored)
 	}
+	slices.Reverse(result)
 	return result, nil
 }

@@ -59,15 +59,21 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 	repoClient := devicerepo.NewClient(config.DeviceRepositoryUrl, nil)
 
 	valkeyClient, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{config.ValKeyUrl}})
+	if err != nil {
+		log.Println("ERROR: unable to create valkey client", err)
+		return controller, err
+	}
 
 	conv, err := converter.New()
 	if err != nil {
+		log.Println("ERROR: unable to create converter", err)
 		return controller, err
 	}
 
 	s := &signal.Broker{}
 	conceptrepo, err := NewConceptRepo(ctx, wg, config, s)
 	if err != nil {
+		log.Println("ERROR: unable to create concept repo", err)
 		return controller, err
 	}
 
@@ -75,6 +81,7 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 
 	anomalyStore, err := anomalystore.New(config)
 	if err != nil {
+		log.Println("ERROR: unable to create anomalystore", err)
 		return controller, err
 	}
 
@@ -97,11 +104,13 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 
 	serviceIDs, err := controller.LoadRegister(register)
 	if err != nil {
+		log.Println("ERROR: unable to LoadRegister", err)
 		return controller, err
 	}
 
 	err = controller.updateConsumer(serviceIDs)
 	if err != nil {
+		log.Println("ERROR: unable to updateConsumer", err)
 		return controller, err
 	}
 
@@ -111,6 +120,7 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 		Wg:          wg,
 	}, config.CacheInvalidationKafkaTopics, s)
 	if err != nil {
+		log.Println("ERROR: unable to StartCacheInvalidatorAll", err)
 		return nil, err
 	}
 
@@ -169,6 +179,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 	protocols := map[string]models.Protocol{}
 	protocolList, err, _ := this.deviceRepoClient.ListProtocols(InternalAdminToken, 9999, 0, "name.asc")
 	if err != nil {
+		log.Println("ERROR: unable to ListProtocols", err)
 		return nil, err
 	}
 	for _, protocol := range protocolList {
@@ -191,6 +202,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 			FilterByDeviceAttributeKeys: []string{this.config.AnomalyDetectorAttribute},
 		})
 		if err != nil {
+			log.Println("ERROR: unable to GetSelectables", err)
 			return nil, err
 		}
 		match := []deviceselectionmodel.Selectable{}
@@ -216,6 +228,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 func (this *Controller) createRouterEntry(h handler.Entry, match []deviceselectionmodel.Selectable, protocols map[string]models.Protocol) (HandlerInfo, error) {
 	aspectNode, err, _ := this.deviceRepoClient.GetAspectNode(h.Aspect)
 	if err != nil {
+		log.Println("ERROR: unable to GetAspectNode", err)
 		return HandlerInfo{}, err
 	}
 	return HandlerInfo{

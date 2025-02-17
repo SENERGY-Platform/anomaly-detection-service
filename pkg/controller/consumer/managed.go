@@ -51,6 +51,7 @@ func (this *ManagedKafkaConsumer) Stop() {
 }
 
 func (this *ManagedKafkaConsumer) stop() {
+	log.Println("stop consumer")
 	if this.cancel != nil {
 		this.cancel()
 		this.cancel = nil
@@ -69,6 +70,11 @@ func (this *ManagedKafkaConsumer) SetOutputCallback(callback func(msg model.Cons
 func (this *ManagedKafkaConsumer) UpdateTopics(topics []string) error {
 	this.mux.Lock()
 	defer this.mux.Unlock()
+	if len(topics) <= 20 {
+		log.Println("update consumer topics: ", topics)
+	} else {
+		log.Println("update consumer topics: ", len(topics))
+	}
 	this.stop()
 	var ctx context.Context
 	ctx, this.cancel = context.WithCancel(context.Background())

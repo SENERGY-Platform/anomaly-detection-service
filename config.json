@@ -1,9 +1,10 @@
 {
     "debug": false,
-    "kafka_url": "",
+    "kafka_url": "kafka.kafka:9092",
+    "kafka_consumer_group": "anomaly-detection-service",
     "device_repository_url": "http://api.device-repository:8080",
     "device_selection_url": "http://api.device-selection:8080",
-    "val_key_url": "",
+    "val_key_url": "REPLACE-ME:6379",
     "notification_url": "http://api.notifier:5000",
     "notification_topic": "analytics",
     "notifications_ignore_duplicates_within_seconds": 86400,

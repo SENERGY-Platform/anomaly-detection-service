@@ -16,7 +16,10 @@
 
 package model
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 type EventMessageWithTimestamp struct {
 	EventMessage
@@ -37,3 +40,9 @@ type ConsumerMessage struct {
 
 var ErrWithRetry = errors.New("will be retried")
 var ErrWillBeIgnored = errors.New("entry will be ignored")
+
+func ServiceIdToTopic(id string) string {
+	id = strings.ReplaceAll(id, "#", "_")
+	id = strings.ReplaceAll(id, ":", "_")
+	return id
+}

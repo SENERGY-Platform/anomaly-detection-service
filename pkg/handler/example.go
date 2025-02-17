@@ -1,3 +1,5 @@
+//go:build exclude
+
 /*
  * Copyright 2025 InfAI (CC SES)
  *
@@ -17,6 +19,8 @@
 package handler
 
 import "log"
+
+// this file/example is ignored by the compiler because of the "//go:build exclude" at the top
 
 func init() {
 	//the example handler will be ignored because bufferSize is 0

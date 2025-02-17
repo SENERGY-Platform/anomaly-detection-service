@@ -23,23 +23,16 @@ import (
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
 	"log"
 	"sort"
-	"strings"
 	"time"
 )
 
 func (this *Controller) updateConsumer(serviceIds []string) error {
 	topics := []string{}
 	for _, serviceId := range serviceIds {
-		topics = append(topics, serviceIdToTopic(serviceId))
+		topics = append(topics, model.ServiceIdToTopic(serviceId))
 	}
 	sort.Strings(topics)
 	return this.consumer.UpdateTopics(topics)
-}
-
-func serviceIdToTopic(id string) string {
-	id = strings.ReplaceAll(id, "#", "_")
-	id = strings.ReplaceAll(id, ":", "_")
-	return id
 }
 
 func (this *Controller) HandleConsumerMessage(msg model.ConsumerMessage) (err error) {

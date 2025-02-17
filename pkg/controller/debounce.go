@@ -30,7 +30,7 @@ type Debounce struct {
 func (this *Debounce) Do(f func()) {
 	this.mux.Lock()
 	defer this.mux.Unlock()
-	if !this.after.Reset(this.Duration) {
+	if this.after == nil || !this.after.Reset(this.Duration) {
 		this.after = time.AfterFunc(this.Duration, f)
 	}
 }
