@@ -183,11 +183,12 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 				AspectId:    h.Aspect,
 			},
 		}, &client.GetSelectablesOptions{
-			IncludeGroups:      false,
-			IncludeImports:     false,
-			IncludeDevices:     true,
-			IncludeIdModified:  false,
-			WithLocalDeviceIds: nil,
+			IncludeGroups:               false,
+			IncludeImports:              false,
+			IncludeDevices:              true,
+			IncludeIdModified:           false,
+			WithLocalDeviceIds:          nil,
+			FilterByDeviceAttributeKeys: []string{this.config.AnomalyDetectorAttribute},
 		})
 		if err != nil {
 			return nil, err

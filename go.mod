@@ -6,8 +6,8 @@ toolchain go1.23.6
 
 require (
 	github.com/SENERGY-Platform/converter v0.0.10
-	github.com/SENERGY-Platform/device-repository v0.2.3
-	github.com/SENERGY-Platform/device-selection v0.0.21
+	github.com/SENERGY-Platform/device-repository v0.2.5
+	github.com/SENERGY-Platform/device-selection v0.0.22
 	github.com/SENERGY-Platform/go-env-loader v0.5.3
 	github.com/SENERGY-Platform/go-service-base/config-hdl v0.2.0
 	github.com/SENERGY-Platform/marshaller v0.0.20
