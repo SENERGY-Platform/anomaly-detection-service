@@ -22,6 +22,8 @@ import (
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
 	"log"
+	"reflect"
+	"sort"
 	"sync"
 )
 
@@ -33,6 +35,7 @@ type ManagedKafkaConsumer struct {
 	mux     sync.Mutex
 	onError func(topic string, err error)
 	stopped bool
+	topics  []string
 }
 
 func NewManagedKafkaConsumer(config configuration.Config, onError func(topic string, err error)) *ManagedKafkaConsumer {
@@ -67,9 +70,22 @@ func (this *ManagedKafkaConsumer) SetOutputCallback(callback func(msg model.Cons
 	this.output = callback
 }
 
-func (this *ManagedKafkaConsumer) UpdateTopics(topics []string) error {
+func (this *ManagedKafkaConsumer) UpdateTopics(topics []string) (err error) {
 	this.mux.Lock()
 	defer this.mux.Unlock()
+	sort.Strings(this.topics)
+	sort.Strings(topics)
+	if !this.stopped && reflect.DeepEqual(this.topics, topics) {
+		log.Println("no topic changes -> continue with current consumer")
+		return nil
+	}
+	defer func() {
+		if err == nil {
+			this.topics = topics
+		} else {
+			this.topics = nil
+		}
+	}()
 	if len(topics) <= 20 {
 		log.Println("update consumer topics: ", topics)
 	} else {
