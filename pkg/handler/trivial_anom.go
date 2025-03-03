@@ -1,4 +1,4 @@
-//go:build exclude
+//"go:build exclude"
 
 /*
  * Copyright 2025 InfAI (CC SES)
@@ -24,16 +24,19 @@ import "log"
 
 func init() {
 	//the example handler will be ignored because bufferSize is 0
-	Registry.Register("example", "function-id", "aspect-id", "characteristic-id", 0, ExampleHandler{})
+	Registry.Register("trivial_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:412a48ad-3a80-46f7-8b99-408c4b9c3528", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 2, TrivialAnomHandler{})
 }
 
-type ExampleHandler struct{}
+type TrivialAnomHandler struct{}
 
-func (this ExampleHandler) Handle(values []interface{}) (anomaly bool, description string, err error) {
+func (this TrivialAnomHandler) Handle(values []interface{}) (anomaly bool, description string, err error) {
 	castValues, err := CastList[float64](values)
 	if err != nil {
 		return false, "", err
 	}
-	log.Println("example", castValues)
+	log.Println("Values:", castValues)
+	if castValues[1] < castValues[0] {
+		return true, "Meter reading jumped back.", nil
+	}
 	return false, "", nil
 }
