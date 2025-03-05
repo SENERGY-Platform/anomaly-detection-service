@@ -24,7 +24,7 @@ import "log"
 
 func init() {
 	//the example handler will be ignored because bufferSize is 0
-	Registry.Register("trivial_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:412a48ad-3a80-46f7-8b99-408c4b9c3528", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 3, BigJumpHandler{})
+	Registry.Register("big_jump_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:412a48ad-3a80-46f7-8b99-408c4b9c3528", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 3, BigJumpHandler{})
 }
 
 type BigJumpHandler struct{}
