@@ -24,12 +24,12 @@ import "log"
 
 func init() {
 	//the example handler will be ignored because bufferSize is 0
-	Registry.Register("trivial_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:412a48ad-3a80-46f7-8b99-408c4b9c3528", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 2, TrivialAnomHandler{})
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:412a48ad-3a80-46f7-8b99-408c4b9c3528", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 2, JumpBackHandler{})
 }
 
-type TrivialAnomHandler struct{}
+type JumpBackHandler struct{}
 
-func (this TrivialAnomHandler) Handle(values []interface{}) (anomaly bool, description string, err error) {
+func (this JumpBackHandler) Handle(values []interface{}) (anomaly bool, description string, err error) {
 	castValues, err := CastList[float64](values)
 	if err != nil {
 		return false, "", err
