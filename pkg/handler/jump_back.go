@@ -1,5 +1,3 @@
-//"go:build exclude"
-
 /*
  * Copyright 2025 InfAI (CC SES)
  *
@@ -20,10 +18,7 @@ package handler
 
 import "log"
 
-// this file/example is ignored by the compiler because of the "//go:build exclude" at the top
-
 func init() {
-	//the example handler will be ignored because bufferSize is 0
 	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 2, JumpBackHandler{})
 	/* Get Electricity Consumption, Electricity-->Total Subaspect, kWh */
 	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:d4ac88cf-f10b-45d5-a3a9-e42b4b2a55ca", 2, JumpBackHandler{})
