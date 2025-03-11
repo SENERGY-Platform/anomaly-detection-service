@@ -24,7 +24,22 @@ import "log"
 
 func init() {
 	//the example handler will be ignored because bufferSize is 0
-	Registry.Register("big_jump_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:412a48ad-3a80-46f7-8b99-408c4b9c3528", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 3, BigJumpHandler{})
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 3, BigJumpHandler{})
+	/* Get Electricity Consumption, Electricity-->Total Subaspect, kWh */
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:d4ac88cf-f10b-45d5-a3a9-e42b4b2a55ca", 3, BigJumpHandler{})
+	/* Get Electricity Consumption, Electricity-->Total Subaspect, Wh */
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:00413fba-f7e9-447c-8476-1d236db9ec53", 3, BigJumpHandler{})
+	/* Get Electricity Consumption, Electricity-->Total Subaspect, Wmin */
+
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:cfa56e75-8e8f-4f0d-a3fa-ed2758422b2a", "urn:infai:ses:aspect:b8b3b549-3b01-4604-a727-20aa528c21c9", "urn:infai:ses:characteristic:aeb260f8-5fe5-4989-9e66-3c0a4ff273c4", 3, BigJumpHandler{})
+	/* Get Volume, Water, Liter */
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:cfa56e75-8e8f-4f0d-a3fa-ed2758422b2a", "urn:infai:ses:aspect:b8b3b549-3b01-4604-a727-20aa528c21c9", "urn:infai:ses:characteristic:fbfea6c7-3392-4ec2-9ec5-0d0ef6362b9b", 3, BigJumpHandler{})
+	/* Get Volume, Water, Cubic Meter*/
+
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:4daa591f-ad97-4e57-8014-aa3f5e552c3b", "urn:infai:ses:aspect:7ea324c1-48e4-419a-a499-325d79dac09f", "urn:infai:ses:characteristic:aeb260f8-5fe5-4989-9e66-3c0a4ff273c4", 3, BigJumpHandler{})
+	/* Get Gas Consumption, Gas, Liter*/
+	Registry.Register("jump_back_anom", "urn:infai:ses:measuring-function:4daa591f-ad97-4e57-8014-aa3f5e552c3b", "urn:infai:ses:aspect:7ea324c1-48e4-419a-a499-325d79dac09f", "urn:infai:ses:characteristic:fbfea6c7-3392-4ec2-9ec5-0d0ef6362b9b", 3, BigJumpHandler{})
+	/* Get Gas Consumption, Gas, Cubic Meter*/
 }
 
 type BigJumpHandler struct{}
