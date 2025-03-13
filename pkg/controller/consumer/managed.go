@@ -54,8 +54,8 @@ func (this *ManagedKafkaConsumer) Stop() {
 }
 
 func (this *ManagedKafkaConsumer) stop() {
-	log.Println("stop consumer")
 	if this.cancel != nil {
+		log.Println("stop consumer")
 		this.cancel()
 		this.cancel = nil
 	}
@@ -75,6 +75,11 @@ func (this *ManagedKafkaConsumer) UpdateTopics(topics []string) (err error) {
 	defer this.mux.Unlock()
 	sort.Strings(this.topics)
 	sort.Strings(topics)
+	if len(topics) <= 20 {
+		log.Println("update consumer topics: ", topics)
+	} else {
+		log.Println("update consumer topics: ", len(topics))
+	}
 	if !this.stopped && reflect.DeepEqual(this.topics, topics) {
 		log.Println("no topic changes -> continue with current consumer")
 		return nil
@@ -86,11 +91,6 @@ func (this *ManagedKafkaConsumer) UpdateTopics(topics []string) (err error) {
 			this.topics = nil
 		}
 	}()
-	if len(topics) <= 20 {
-		log.Println("update consumer topics: ", topics)
-	} else {
-		log.Println("update consumer topics: ", len(topics))
-	}
 	this.stop()
 	var ctx context.Context
 	ctx, this.cancel = context.WithCancel(context.Background())

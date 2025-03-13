@@ -102,6 +102,10 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 
 	controller.consumer.SetOutputCallback(controller.HandleConsumerMessage)
 
+	for _, h := range register.List() {
+		log.Println("start with known handler", h.Name)
+	}
+
 	serviceIDs, err := controller.LoadRegister(register)
 	if err != nil {
 		log.Println("ERROR: unable to LoadRegister", err)
@@ -187,7 +191,6 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 	}
 
 	for _, h := range register.List() {
-		log.Println("start handler", h.Name)
 		selectables, _, err := this.selectionClient.GetSelectables(InternalAdminToken, []models.DeviceGroupFilterCriteria{
 			{
 				Interaction: models.EVENT,
@@ -206,6 +209,9 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 			log.Println("ERROR: unable to GetSelectables", err)
 			return nil, err
 		}
+		if this.config.Debug {
+			log.Printf("DEBUG: found %v selectables\n", len(selectables))
+		}
 		match := []deviceselectionmodel.Selectable{}
 		for _, selectable := range selectables {
 			if selectable.Device != nil && this.hasAnomalyDetectorAttribute(selectable.Device) {
@@ -216,6 +222,9 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 				}
 				match = append(match, selectable)
 			}
+		}
+		if this.config.Debug {
+			log.Printf("DEBUG: found %v matches and %v sevices\n", len(match), len(serviceIds))
 		}
 		entry, err := this.createRouterEntry(h, match, protocols)
 		if err != nil {
