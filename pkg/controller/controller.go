@@ -187,6 +187,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 	}
 
 	for _, h := range register.List() {
+		log.Println("start handler", h.Name)
 		selectables, _, err := this.selectionClient.GetSelectables(InternalAdminToken, []models.DeviceGroupFilterCriteria{
 			{
 				Interaction: models.EVENT,
