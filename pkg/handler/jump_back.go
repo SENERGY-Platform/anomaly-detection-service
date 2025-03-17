@@ -22,6 +22,9 @@ func init() {
 	/* Get Electricity Consumption, Electricity-->Total Subaspect, kWh */
 	Registry.Register("jump_back_anom_electricity_consumption_total_kwh", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 2, JumpBackHandler{})
 
+	/* Get Electricity Consumption, Electricity-->Today Subaspect, kWh */
+	Registry.Register("jump_back_anom_electricity_consumption_today_kwh", "urn:infai:ses:measuring-function:57dfd369-92db-462c-aca4-a767b52c972e", "urn:infai:ses:aspect:82b9e844-1fa6-4fb5-8213-ec7333a9a8ba", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 2, JumpBackHandler{})
+
 	/* Get Volume, Water, Liter */
 	Registry.Register("jump_back_anom_volume_water_liter", "urn:infai:ses:measuring-function:cfa56e75-8e8f-4f0d-a3fa-ed2758422b2a", "urn:infai:ses:aspect:b8b3b549-3b01-4604-a727-20aa528c21c9", "urn:infai:ses:characteristic:aeb260f8-5fe5-4989-9e66-3c0a4ff273c4", 2, JumpBackHandler{})
 
