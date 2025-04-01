@@ -41,6 +41,7 @@ func (this JumpBackHandler) Handle(values []interface{}) (anomaly bool, descript
 	}
 	log.Println("Values:", castValues)
 	if castValues[1] < castValues[0] {
+		log.Println("Meter reading jumped back.")
 		return true, "Meter reading jumped back.", nil
 	}
 	return false, "", nil
