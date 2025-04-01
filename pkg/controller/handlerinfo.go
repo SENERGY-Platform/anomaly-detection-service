@@ -68,7 +68,11 @@ func (this *HandlerInfo) do(deviceId string, service models.Service, rawValue ma
 	if len(list) < this.handler.BufferSize {
 		return nil
 	}
-	anomaly, desc, err := this.callHandler(list)
+	anomaly, desc, err := this.callHandler(Context{
+		DeviceId:  deviceId,
+		ServiceId: service.Id,
+		Store:     &Store{ValKeyClient: this.valKeyClient},
+	}, list)
 	if err != nil {
 		return errors.Join(fmt.Errorf("unable to handle"), err, model.ErrWillBeIgnored)
 	}
@@ -81,7 +85,9 @@ func (this *HandlerInfo) do(deviceId string, service models.Service, rawValue ma
 	return nil
 }
 
-func (this *HandlerInfo) callHandler(values []interface{}) (anomaly bool, description string, err error) {
+type Context = handler.Context
+
+func (this *HandlerInfo) callHandler(context Context, values []interface{}) (anomaly bool, description string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			anomaly = false
@@ -89,6 +95,6 @@ func (this *HandlerInfo) callHandler(values []interface{}) (anomaly bool, descri
 			err = errors.New("panic:" + fmt.Sprint(r))
 		}
 	}()
-	anomaly, description, err = this.handler.Handle(values)
+	anomaly, description, err = this.handler.Handle(context, values)
 	return anomaly, description, err
 }

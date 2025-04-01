@@ -23,5 +23,16 @@ type Handler interface {
 	//			err only for internal errors
 	//			anomaly = true if one was found
 	//			description with a human-readable description of the anomaly, if one was found
-	Handle(values []interface{}) (anomaly bool, description string, err error)
+	Handle(context Context, values []interface{}) (anomaly bool, description string, err error)
+}
+
+type Context struct {
+	DeviceId  string
+	ServiceId string
+	Store     Store
+}
+
+type Store interface {
+	Get(key string, value interface{}) error
+	Set(key string, value interface{}) error
 }

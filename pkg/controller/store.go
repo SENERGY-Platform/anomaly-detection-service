@@ -28,6 +28,37 @@ import (
 	"time"
 )
 
+type Store struct {
+	ValKeyClient valkey.Client
+}
+
+func (this *Store) Get(key string, value interface{}) (err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	resp := this.ValKeyClient.Do(ctx, this.ValKeyClient.B().Get().Key(key).Build())
+	err = resp.Error()
+	if err != nil {
+		return fmt.Errorf("unable to get value %v from value: %w", key, err)
+	}
+	err = resp.DecodeJSON(value)
+	if err != nil {
+		return fmt.Errorf("unable to unmarshal value %v: %w", key, err)
+	}
+	return nil
+}
+
+func (this *Store) Set(key string, value interface{}) (err error) {
+	valueBuff, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("unable to marshal value %v: %w", key, err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	err = this.ValKeyClient.Do(ctx, this.ValKeyClient.B().Set().Key(key).Value(string(valueBuff)).Build()).Error()
+	if err != nil {
+		return fmt.Errorf("unable to store value %v: %w", key, err)
+	}
+	return nil
+}
+
 func (this *HandlerInfo) storeAndListValues(handlerName string, deviceId string, serviceId string, size int, value interface{}) (result []interface{}, err error) {
 	key := fmt.Sprintf("%s_%s_%s", handlerName, deviceId, serviceId)
 

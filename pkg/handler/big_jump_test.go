@@ -16,7 +16,9 @@
 
 package handler
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestBigJumpHandler_Handle(t *testing.T) {
 	type args struct {
@@ -66,10 +68,11 @@ func TestBigJumpHandler_Handle(t *testing.T) {
 			wantErr:         false,
 		},
 	}
+	store := &TestStore{}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			this := BigJumpHandler{}
-			gotAnomaly, gotDescription, err := this.Handle(tt.args.values)
+			gotAnomaly, gotDescription, err := this.Handle(Context{DeviceId: "test-device", ServiceId: "test-service", Store: store}, tt.args.values)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Handle() error = %v, wantErr %v", err, tt.wantErr)
 				return

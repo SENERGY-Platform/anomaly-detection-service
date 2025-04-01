@@ -27,8 +27,8 @@ type Entry struct {
 	Handler        Handler
 }
 
-func (this *Entry) Handle(values []interface{}) (anomaly bool, description string, err error) {
-	return this.Handler.Handle(values)
+func (this *Entry) Handle(context Context, values []interface{}) (anomaly bool, description string, err error) {
+	return this.Handler.Handle(context, values)
 }
 
 type Register struct {

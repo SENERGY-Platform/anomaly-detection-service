@@ -31,6 +31,7 @@ import (
 	permissions "github.com/SENERGY-Platform/permissions-v2/pkg/client"
 	model2 "github.com/SENERGY-Platform/permissions-v2/pkg/model"
 	"github.com/segmentio/kafka-go"
+	"github.com/valkey-io/valkey-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -44,6 +45,49 @@ import (
 	"testing"
 	"time"
 )
+
+func TestStore(t *testing.T) {
+	wg := &sync.WaitGroup{}
+	defer wg.Wait()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	config, err := configuration.Load("../../config.json")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, valKeyIp, err := docker.ValKey(ctx, wg)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	config.ValKeyUrl = valKeyIp + ":6379"
+
+	valkeyClient, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{config.ValKeyUrl}})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	store := controller.Store{ValKeyClient: valkeyClient}
+
+	err = store.Set("test", 1.0)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	var result float64
+	err = store.Get("test", &result)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if result != 1.0 {
+		t.Errorf("result should be 1.0, got %v", result)
+	}
+}
 
 func TestIntegration(t *testing.T) {
 	wg := &sync.WaitGroup{}
@@ -498,7 +542,7 @@ type TestHandler struct {
 	}
 }
 
-func (this *TestHandler) Handle(values []interface{}) (anomaly bool, description string, err error) {
+func (this *TestHandler) Handle(_ handler.Context, values []interface{}) (anomaly bool, description string, err error) {
 	this.mux.Lock()
 	defer this.mux.Unlock()
 	f := this.F

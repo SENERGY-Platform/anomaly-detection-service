@@ -34,7 +34,7 @@ func init() {
 
 type JumpBackHandler struct{}
 
-func (this JumpBackHandler) Handle(values []interface{}) (anomaly bool, description string, err error) {
+func (this JumpBackHandler) Handle(context Context, values []interface{}) (anomaly bool, description string, err error) {
 	castValues, err := CastList[float64](values)
 	if err != nil {
 		return false, "", err
