@@ -16,6 +16,8 @@
 
 package handler
 
+import "fmt"
+
 type Handler interface {
 	// Handle
 	//		receives the last n values (oldest first, newest last)
@@ -30,6 +32,10 @@ type Context struct {
 	DeviceId  string
 	ServiceId string
 	Store     Store
+}
+
+func (this Context) PrepareKey(handlerName string, subKey string) string {
+	return fmt.Sprintf("handlerstore_%s_%s_%s_%s", handlerName, this.DeviceId, this.ServiceId, subKey)
 }
 
 type Store interface {
