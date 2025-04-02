@@ -34,7 +34,7 @@ func TestBigJumpHandler_Handle(t *testing.T) {
 		{
 			name: "close_big_jump",
 			args: args{
-				values: []interface{}{1.0, 2.0, 102.1},
+				values: []interface{}{1.0, 3.6},
 			},
 			wantAnomaly:     true,
 			wantDescription: "Meter reading had big jump.",
@@ -43,25 +43,16 @@ func TestBigJumpHandler_Handle(t *testing.T) {
 		{
 			name: "close_no_big_jump",
 			args: args{
-				values: []interface{}{1.0, 2.0, 102.0},
+				values: []interface{}{1.0, 3.4},
 			},
 			wantAnomaly:     false,
 			wantDescription: "",
 			wantErr:         false,
 		},
 		{
-			name: "no_reference_from_first_two_values",
+			name: "big_jump",
 			args: args{
-				values: []interface{}{1.0, 1.099, 102},
-			},
-			wantAnomaly:     false,
-			wantDescription: "",
-			wantErr:         false,
-		},
-		{
-			name: "close_big_jump_rel_short",
-			args: args{
-				values: []interface{}{1.0, 1.11, 12.22},
+				values: []interface{}{1.0, 5.0},
 			},
 			wantAnomaly:     true,
 			wantDescription: "Meter reading had big jump.",
@@ -69,6 +60,9 @@ func TestBigJumpHandler_Handle(t *testing.T) {
 		},
 	}
 	store := &TestStore{}
+	store.Set("handlerstore_big_jump_test-device_test-service_mean", 2.0)
+	store.Set("handlerstore_big_jump_test-device_test-service_stddev", 0.1)
+	store.Set("handlerstore_big_jump_test-device_test-service_num_datepoints", 4.0)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			this := BigJumpHandler{}

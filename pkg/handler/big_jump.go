@@ -56,10 +56,10 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 	}
 
 	/* Number of tracked differences up to now*/
-	var NumDatepoints int
+	var NumDatepoints float64
 	err = context.Store.Get(context.PrepareKey("big_jump", "num_datepoints"), NumDatepoints)
 	if err != nil {
-		NumDatepoints = 0
+		NumDatepoints = 0.0
 	}
 
 	latestDifference := castValues[1] - castValues[0]
@@ -83,11 +83,11 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 }
 
 /*Sample Update of standard deviation*/
-func UpdateStddev(latestValue float64, CurrentStddev float64, CurrentMean float64, NumDatepoints int) float64 {
-	return math.Sqrt(float64(NumDatepoints)/(float64(NumDatepoints+1))*math.Pow(CurrentStddev, 2) + float64(NumDatepoints)/math.Pow(float64(NumDatepoints)+1, 2)*math.Pow(latestValue-CurrentMean, 2))
+func UpdateStddev(latestValue float64, CurrentStddev float64, CurrentMean float64, NumDatepoints float64) float64 {
+	return math.Sqrt(NumDatepoints/(NumDatepoints+1)*math.Pow(CurrentStddev, 2) + NumDatepoints/math.Pow(NumDatepoints+1, 2)*math.Pow(latestValue-CurrentMean, 2))
 }
 
 /*Sample Update of mean*/
-func UpdateMean(latestValue float64, CurrentMean float64, NumDatepoints int) float64 {
-	return (float64(NumDatepoints)*CurrentMean + latestValue) / (float64(NumDatepoints) + 1)
+func UpdateMean(latestValue float64, CurrentMean float64, NumDatepoints float64) float64 {
+	return (NumDatepoints*CurrentMean + latestValue) / (NumDatepoints + 1)
 }
