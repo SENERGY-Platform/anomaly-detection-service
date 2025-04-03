@@ -43,21 +43,21 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 
 	/* Std deviation of differences between consecutive meter values*/
 	var CurrentStddev float64
-	err = context.Store.Get(context.PrepareKey("big_jump", "stddev"), CurrentStddev)
+	err = context.Store.Get(context.PrepareKey("big_jump", "stddev"), &CurrentStddev)
 	if err != nil {
 		CurrentStddev = 0
 	}
 
 	/* Mean of differences between consecutive meter values*/
 	var CurrentMean float64
-	err = context.Store.Get(context.PrepareKey("big_jump", "mean"), CurrentMean)
+	err = context.Store.Get(context.PrepareKey("big_jump", "mean"), &CurrentMean)
 	if err != nil {
 		CurrentMean = 0
 	}
 
 	/* Number of tracked differences up to now*/
 	var NumDatepoints float64
-	err = context.Store.Get(context.PrepareKey("big_jump", "num_datepoints"), NumDatepoints)
+	err = context.Store.Get(context.PrepareKey("big_jump", "num_datepoints"), &NumDatepoints)
 	if err != nil {
 		NumDatepoints = 0.0
 	}
