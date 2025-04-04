@@ -41,6 +41,12 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 	}
 	log.Println("Values:", castValues)
 
+	latestDifference := castValues[1] - castValues[0]
+
+	if latestDifference == 0.0 {
+		return false, "", err
+	}
+
 	/* Std deviation of differences between consecutive meter values*/
 	var CurrentStddev float64
 	err = context.Store.Get(context.PrepareKey("big_jump", "stddev"), &CurrentStddev)
@@ -61,8 +67,6 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 	if err != nil {
 		NumDatepoints = 0.0
 	}
-
-	latestDifference := castValues[1] - castValues[0]
 
 	var bigJump bool = latestDifference > CurrentMean+5*CurrentStddev
 
