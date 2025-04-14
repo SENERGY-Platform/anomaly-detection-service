@@ -43,22 +43,31 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 
 	/* Std deviation of differences between consecutive meter values*/
 	var CurrentStddev float64
-	err = context.Store.Get(context.PrepareKey("big_jump", "stddev"), &CurrentStddev)
+	exists, err := context.Store.Get(context.PrepareKey("big_jump", "stddev"), &CurrentStddev)
 	if err != nil {
+		return false, "", err
+	}
+	if !exists {
 		CurrentStddev = 0
 	}
 
 	/* Mean of differences between consecutive meter values*/
 	var CurrentMean float64
-	err = context.Store.Get(context.PrepareKey("big_jump", "mean"), &CurrentMean)
+	exists, err = context.Store.Get(context.PrepareKey("big_jump", "mean"), &CurrentMean)
 	if err != nil {
+		return false, "", err
+	}
+	if !exists {
 		CurrentMean = 0
 	}
 
 	/* Number of tracked differences up to now*/
 	var NumDatepoints float64
-	err = context.Store.Get(context.PrepareKey("big_jump", "num_datepoints"), &NumDatepoints)
+	exists, err = context.Store.Get(context.PrepareKey("big_jump", "num_datepoints"), &NumDatepoints)
 	if err != nil {
+		return false, "", err
+	}
+	if !exists {
 		NumDatepoints = 0.0
 	}
 
@@ -67,13 +76,22 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 	var bigJump bool = latestDifference > CurrentMean+5*CurrentStddev
 
 	CurrentStddev = UpdateStddev(latestDifference, CurrentStddev, CurrentMean, NumDatepoints)
-	context.Store.Set(context.PrepareKey("big_jump", "stddev"), CurrentStddev)
+	err = context.Store.Set(context.PrepareKey("big_jump", "stddev"), CurrentStddev)
+	if err != nil {
+		return false, "", err
+	}
 
 	CurrentMean = UpdateMean(latestDifference, CurrentMean, NumDatepoints)
-	context.Store.Set(context.PrepareKey("big_jump", "mean"), CurrentMean)
+	err = context.Store.Set(context.PrepareKey("big_jump", "mean"), CurrentMean)
+	if err != nil {
+		return false, "", err
+	}
 
 	NumDatepoints = NumDatepoints + 1
-	context.Store.Set(context.PrepareKey("big_jump", "num_datepoints"), NumDatepoints)
+	err = context.Store.Set(context.PrepareKey("big_jump", "num_datepoints"), NumDatepoints)
+	if err != nil {
+		return false, "", err
+	}
 
 	if bigJump {
 		log.Println("Meter reading had big jump.")
