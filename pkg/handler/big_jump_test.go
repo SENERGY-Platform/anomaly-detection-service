@@ -62,7 +62,7 @@ func TestBigJumpHandler_Handle(t *testing.T) {
 	store := &TestStore{}
 	store.Set("handlerstore_big_jump_test-device_test-service_mean", 2.0)
 	store.Set("handlerstore_big_jump_test-device_test-service_stddev", 0.1)
-	store.Set("handlerstore_big_jump_test-device_test-service_num_datepoints", 4.0)
+	store.Set("handlerstore_big_jump_test-device_test-service_num_datepoints", 100.0)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			this := BigJumpHandler{}

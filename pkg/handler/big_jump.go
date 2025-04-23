@@ -79,6 +79,11 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 	NumDatepoints = NumDatepoints + 1
 	context.Store.Set(context.PrepareKey("big_jump", "num_datepoints"), NumDatepoints)
 
+	var init_Phase bool = NumDatepoints <= 100
+	if init_Phase {
+		return false, "", err
+	}
+
 	if bigJump {
 		log.Println("Meter reading had big jump.")
 		return true, "Meter reading had big jump.", nil
