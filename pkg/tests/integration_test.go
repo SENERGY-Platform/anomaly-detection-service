@@ -73,19 +73,45 @@ func TestStore(t *testing.T) {
 
 	store := controller.Store{ValKeyClient: valkeyClient}
 
+	var result float64
+
+	exists, err := store.Get("test", &result)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if exists {
+		t.Error("expected result not to exist")
+		return
+	}
+
 	err = store.Set("test", 1.0)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	var result float64
-	err = store.Get("test", &result)
+
+	exists, err = store.Get("test", &result)
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	if !exists {
+		t.Error("expected result to exist")
+		return
+	}
 	if result != 1.0 {
 		t.Errorf("result should be 1.0, got %v", result)
+	}
+
+	exists, err = store.Get("unknown", &result)
+	if err != nil {
+		t.Errorf("%#v\n", err)
+		return
+	}
+	if exists {
+		t.Error("expected result not to exist")
+		return
 	}
 }
 

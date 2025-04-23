@@ -17,7 +17,6 @@
 package handler
 
 import (
-	"errors"
 	"reflect"
 	"sync"
 	"testing"
@@ -38,7 +37,7 @@ func (this *TestStore) Set(key string, value interface{}) (err error) {
 	return nil
 }
 
-func (this *TestStore) Get(key string, value interface{}) (err error) {
+func (this *TestStore) Get(key string, value interface{}) (exists bool, err error) {
 	this.mux.Lock()
 	defer this.mux.Unlock()
 	if this.values == nil {
@@ -46,10 +45,10 @@ func (this *TestStore) Get(key string, value interface{}) (err error) {
 	}
 	val, ok := this.values[key]
 	if !ok {
-		return errors.New("key not found")
+		return false, nil
 	}
 	reflect.Indirect(reflect.ValueOf(value)).Set(reflect.ValueOf(val))
-	return nil
+	return true, nil
 }
 
 func TestTestStore(t *testing.T) {
@@ -60,12 +59,12 @@ func TestTestStore(t *testing.T) {
 		return
 	}
 	var result float64
-	err = store.Get("test", &result)
+	exists, err := store.Get("test", &result)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if result != 1.0 {
+	if !exists || result != 1.0 {
 		t.Errorf("result should be 1.0, got %v", result)
 	}
 }

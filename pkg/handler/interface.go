@@ -39,6 +39,6 @@ func (this Context) PrepareKey(handlerName string, subKey string) string {
 }
 
 type Store interface {
-	Get(key string, value interface{}) error
+	Get(key string, value interface{}) (exists bool, err error)
 	Set(key string, value interface{}) error
 }
