@@ -29,6 +29,7 @@ import (
 
 func Start(ctx context.Context, wg *sync.WaitGroup, confIn configuration.Config, notifierF func(http.ResponseWriter, *http.Request)) (confOut configuration.Config, err error) {
 	confOut = confIn
+	confOut.InitTopics = true
 
 	_, mongoIp, err := MongoDB(ctx, wg)
 	if err != nil {

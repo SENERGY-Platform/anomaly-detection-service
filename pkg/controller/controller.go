@@ -122,6 +122,7 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 		KafkaUrl:    config.KafkaUrl,
 		StartOffset: kafka.LastOffset,
 		Wg:          wg,
+		InitTopic:   config.InitTopics,
 	}, config.CacheInvalidationKafkaTopics, s)
 	if err != nil {
 		log.Println("ERROR: unable to StartCacheInvalidatorAll", err)

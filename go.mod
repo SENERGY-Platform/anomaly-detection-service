@@ -1,19 +1,19 @@
 module github.com/SENERGY-Platform/anomaly-detection-service
 
-go 1.23.1
+go 1.24.0
 
-toolchain go1.23.6
+toolchain go1.24.4
 
 require (
 	github.com/SENERGY-Platform/converter v0.0.10
-	github.com/SENERGY-Platform/device-repository v0.2.7
-	github.com/SENERGY-Platform/device-selection v0.0.22
+	github.com/SENERGY-Platform/device-repository v0.2.27
+	github.com/SENERGY-Platform/device-selection v0.0.25
 	github.com/SENERGY-Platform/go-env-loader v0.5.3
 	github.com/SENERGY-Platform/go-service-base/config-hdl v0.2.0
-	github.com/SENERGY-Platform/marshaller v0.0.20
+	github.com/SENERGY-Platform/marshaller v0.0.22
 	github.com/SENERGY-Platform/models/go v0.0.0-20241007061544-de7132ae94e4
-	github.com/SENERGY-Platform/permissions-v2 v0.0.27
-	github.com/SENERGY-Platform/service-commons v0.0.0-20250123095636-6dfc659ee43e
+	github.com/SENERGY-Platform/permissions-v2 v0.0.38
+	github.com/SENERGY-Platform/service-commons v0.0.0-20250624131956-6c08be412ea0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/testcontainers/testcontainers-go v0.33.0
 	github.com/valkey-io/valkey-go v1.0.54
@@ -29,6 +29,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/RyanCarrier/dijkstra v1.4.0 // indirect
 	github.com/SENERGY-Platform/developer-notifications v0.0.4 // indirect
+	github.com/SENERGY-Platform/go-service-base/struct-logger v0.4.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/containerd/log v0.1.0 // indirect
@@ -99,8 +100,10 @@ require (
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.54.0 // indirect
 	go.opentelemetry.io/otel v1.33.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.19.0 // indirect
 	go.opentelemetry.io/otel/metric v1.33.0 // indirect
 	go.opentelemetry.io/otel/trace v1.33.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/exp v0.0.0-20250207012021-f9890c6ad9f3 // indirect
 	golang.org/x/net v0.34.0 // indirect

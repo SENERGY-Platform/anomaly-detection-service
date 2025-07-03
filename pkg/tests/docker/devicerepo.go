@@ -33,6 +33,7 @@ func DeviceRepo(ctx context.Context, wg *sync.WaitGroup, kafkaUrl string, mongoU
 				"KAFKA_URL":          kafkaUrl,
 				"PERMISSIONS_V2_URL": permv2Url,
 				"MONGO_URL":          mongoUrl,
+				"INIT_TOPICS":        "true",
 			},
 			ExposedPorts:    []string{"8080/tcp"},
 			WaitingFor:      wait.ForListeningPort("8080/tcp"),

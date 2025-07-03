@@ -33,6 +33,7 @@ func PermissionsV2(ctx context.Context, wg *sync.WaitGroup, mongoUrl string, kaf
 				"DEV_NOTIFIER_URL": "",
 				"MONGO_URL":        mongoUrl,
 				"KAFKA_URL":        kafkaUrl,
+				"INIT_TOPICS":      "true",
 			},
 			ExposedPorts:    []string{"8080/tcp"},
 			WaitingFor:      wait.ForListeningPort("8080/tcp"),

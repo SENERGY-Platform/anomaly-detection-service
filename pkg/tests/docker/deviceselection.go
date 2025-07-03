@@ -33,6 +33,7 @@ func DeviceSelection(ctx context.Context, wg *sync.WaitGroup, kafkaUrl string, d
 				"KAFKA_URL":       kafkaUrl,
 				"DEVICE_REPO_URL": deviceRepoUrl,
 				"DEBUG":           "true",
+				"INIT_TOPICS":     "true",
 			},
 			ExposedPorts:    []string{"8080/tcp"},
 			WaitingFor:      wait.ForListeningPort("8080/tcp"),

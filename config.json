@@ -12,6 +12,7 @@
     "mongo_table": "anomaly_detection",
     "mongo_anomaly_collection": "anomalies",
     "cache_duration": "10m",
+    "init_topics": false,
     "cache_invalidation_kafka_topics": [
         "devices",
         "device-types",

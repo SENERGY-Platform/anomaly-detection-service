@@ -39,6 +39,7 @@ type Config struct {
 	MongoTable                           string   `json:"mongo_table" env_var:"MONGO_TABLE"`
 	MongoAnomalyCollection               string   `json:"mongo_anomaly_collection" env_var:"MONGO_ANOMALY_COLLECTION"`
 	AnomalyDetectorAttribute             string   `json:"anomaly_detector_attribute" env_var:"ANOMALY_DETECTOR_ATTRIBUTE"`
+	InitTopics                           bool     `json:"init_topics" env_var:"INIT_TOPICS"`
 }
 
 func Load(location string) (conf Config, err error) {
