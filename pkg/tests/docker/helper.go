@@ -18,13 +18,14 @@ package docker
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
-	"github.com/segmentio/kafka-go"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"sync"
+
+	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
+	"github.com/segmentio/kafka-go"
 )
 
 func Start(ctx context.Context, wg *sync.WaitGroup, confIn configuration.Config, notifierF func(http.ResponseWriter, *http.Request)) (confOut configuration.Config, err error) {
@@ -37,13 +38,7 @@ func Start(ctx context.Context, wg *sync.WaitGroup, confIn configuration.Config,
 	}
 	confOut.MongoUrl = "mongodb://" + mongoIp + ":27017"
 
-	_, zkIp, err := Zookeeper(ctx, wg)
-	if err != nil {
-		return confOut, err
-	}
-	zookeeperUrl := zkIp + ":2181"
-
-	confOut.KafkaUrl, err = Kafka(ctx, wg, zookeeperUrl)
+	confOut.KafkaUrl, err = Kafka(ctx, wg)
 	if err != nil {
 		return confOut, err
 	}
