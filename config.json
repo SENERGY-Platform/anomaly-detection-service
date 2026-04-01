@@ -20,5 +20,7 @@
         "concepts",
         "characteristics"
     ],
-    "anomaly_detector_attribute": "anomaly-detector"
+    "anomaly_detector_attribute": "anomaly-detector",
+
+    "log_level": "info"
 }

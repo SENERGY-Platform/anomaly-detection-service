@@ -18,18 +18,18 @@ package anomalystore
 
 import (
 	"context"
+	"reflect"
+	"runtime/debug"
+	"slices"
+	"strings"
+	"time"
+
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
-	"log"
-	"reflect"
-	"runtime/debug"
-	"slices"
-	"strings"
-	"time"
 )
 
 type Mongo struct {
@@ -62,7 +62,7 @@ func New(conf configuration.Config) (*Mongo, error) {
 
 func (this *Mongo) Disconnect() {
 	timeout, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	log.Println(this.client.Disconnect(timeout))
+	this.config.GetLogger().Info("disconnected from mongo", "result", this.client.Disconnect(timeout))
 }
 
 func getBsonFieldObject[T any]() T {

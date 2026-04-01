@@ -17,7 +17,7 @@
 package handler
 
 import (
-	"log"
+	"log/slog"
 	"math"
 )
 
@@ -39,7 +39,7 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 	if err != nil {
 		return false, "", err
 	}
-	log.Println("Values:", castValues)
+	slog.Debug("BigJumpHandler.Handle", "castValues", castValues)
 
 	latestDifference := castValues[1] - castValues[0]
 
@@ -103,7 +103,7 @@ func (this BigJumpHandler) Handle(context Context, values []interface{}) (anomal
 	}
 
 	if bigJump {
-		log.Println("Meter reading had big jump.")
+		slog.Info("Meter reading had big jump.", "CurrentMean", CurrentMean, "CurrentStddev", CurrentStddev, "NumDatepoints", NumDatepoints, "castValues", castValues)
 		return true, "Meter reading had big jump.", nil
 	}
 	return false, "", nil

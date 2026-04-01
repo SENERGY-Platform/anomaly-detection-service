@@ -22,12 +22,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
+
+	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
 )
 
 func (this *HandlerInfo) reactToAnomaly(handlerName string, deviceId string, serviceId string, desc string, timestamp int64) (err error) {
@@ -60,9 +60,7 @@ func (this *HandlerInfo) notify(handlerName string, deviceId string, serviceId s
 		return err
 	}
 	endpoint := this.config.NotificationUrl + "/notifications?ignore_duplicates_within_seconds=" + strconv.FormatInt(this.config.NotificationsIgnoreDuplicatesWithinS, 10)
-	if this.config.Debug {
-		log.Printf("DEBUG: send notification to %v with %v\n", msg.UserId, endpoint)
-	}
+	this.config.GetLogger().Debug("send notification", "userId", msg.UserId, "endpoint", endpoint, "msg", msg)
 	req, err := http.NewRequest("POST", endpoint, b)
 	if err != nil {
 		return err
@@ -76,7 +74,7 @@ func (this *HandlerInfo) notify(handlerName string, deviceId string, serviceId s
 	}
 	if resp.StatusCode >= 300 {
 		respMsg, _ := io.ReadAll(resp.Body)
-		log.Println("ERROR: unexpected response status from notifier", resp.StatusCode, string(respMsg))
+		this.config.GetLogger().Error("unexpected response status from notifier", "status", resp.StatusCode, "body", string(respMsg))
 		return errors.New("unexpected response status from notifier " + resp.Status)
 	}
 	return nil

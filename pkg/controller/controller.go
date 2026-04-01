@@ -18,6 +18,12 @@ package controller
 
 import (
 	"context"
+	"log"
+	"slices"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/controller/anomalystore"
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/controller/consumer"
@@ -34,11 +40,6 @@ import (
 	"github.com/SENERGY-Platform/service-commons/pkg/kafka"
 	"github.com/SENERGY-Platform/service-commons/pkg/signal"
 	"github.com/valkey-io/valkey-go"
-	"log"
-	"slices"
-	"strings"
-	"sync"
-	"time"
 )
 
 type Controller struct {
@@ -60,20 +61,20 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 
 	valkeyClient, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{config.ValKeyUrl}})
 	if err != nil {
-		log.Println("ERROR: unable to create valkey client", err)
+		config.GetLogger().Error("unable to create valkey client", "error", err)
 		return controller, err
 	}
 
 	conv, err := converter.New()
 	if err != nil {
-		log.Println("ERROR: unable to create converter", err)
+		config.GetLogger().Error("unable to create converter", "error", err)
 		return controller, err
 	}
 
 	s := &signal.Broker{}
 	conceptrepo, err := NewConceptRepo(ctx, wg, config, s)
 	if err != nil {
-		log.Println("ERROR: unable to create concept repo", err)
+		config.GetLogger().Error("unable to create concept repo", "error", err)
 		return controller, err
 	}
 
@@ -81,7 +82,7 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 
 	anomalyStore, err := anomalystore.New(config)
 	if err != nil {
-		log.Println("ERROR: unable to create anomalystore", err)
+		config.GetLogger().Error("unable to create anomalystore", "error", err)
 		return controller, err
 	}
 
@@ -96,6 +97,7 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 		marshaller:       m,
 		debounce:         &Debounce{Duration: 2 * time.Second}, //to prevent to many reloads if a series of changes happens
 		consumer: consumer.NewManagedKafkaConsumer(config, func(topic string, err error) {
+			config.GetLogger().Error("FATAL: error while consuming topic", "topic", topic, "error", err)
 			log.Fatalf("FATAL: error while consuming topic %s: %v\n", topic, err)
 		}),
 	}
@@ -103,18 +105,18 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 	controller.consumer.SetOutputCallback(controller.HandleConsumerMessage)
 
 	for _, h := range register.List() {
-		log.Println("start with known handler", h.Name)
+		config.GetLogger().Info("start with known handler", "handler", h.Name)
 	}
 
 	serviceIDs, err := controller.LoadRegister(register)
 	if err != nil {
-		log.Println("ERROR: unable to LoadRegister", err)
+		config.GetLogger().Error("unable to LoadRegister", "error", err)
 		return controller, err
 	}
 
 	err = controller.updateConsumer(serviceIDs)
 	if err != nil {
-		log.Println("ERROR: unable to updateConsumer", err)
+		config.GetLogger().Error("unable to updateConsumer", "error", err)
 		return controller, err
 	}
 
@@ -125,7 +127,7 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 		InitTopic:   config.InitTopics,
 	}, config.CacheInvalidationKafkaTopics, s)
 	if err != nil {
-		log.Println("ERROR: unable to StartCacheInvalidatorAll", err)
+		config.GetLogger().Error("unable to StartCacheInvalidatorAll", "error", err)
 		return nil, err
 	}
 
@@ -133,11 +135,13 @@ func StartController(ctx context.Context, wg *sync.WaitGroup, config configurati
 		controller.debounce.Do(func() {
 			serviceIDs, err = controller.LoadRegister(register)
 			if err != nil {
+				config.GetLogger().Error("FATAL: unable to refresh register", "error", err)
 				log.Fatalln("ERROR: unable to refresh register", err)
 				return
 			}
 			err = controller.updateConsumer(serviceIDs)
 			if err != nil {
+				config.GetLogger().Error("FATAL: unable to update kafka consumer", "error", err)
 				log.Fatalln("FATAL: unable to update kafka consumer", err)
 				return
 			}
@@ -184,7 +188,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 	protocols := map[string]models.Protocol{}
 	protocolList, err, _ := this.deviceRepoClient.ListProtocols(InternalAdminToken, 9999, 0, "name.asc")
 	if err != nil {
-		log.Println("ERROR: unable to ListProtocols", err)
+		this.config.GetLogger().Error("unable to ListProtocols", "error", err)
 		return nil, err
 	}
 	for _, protocol := range protocolList {
@@ -207,12 +211,10 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 			FilterByDeviceAttributeKeys: []string{this.config.AnomalyDetectorAttribute},
 		})
 		if err != nil {
-			log.Println("ERROR: unable to GetSelectables", err)
+			this.config.GetLogger().Error("unable to GetSelectables", "error", err)
 			return nil, err
 		}
-		if this.config.Debug {
-			log.Printf("DEBUG: found %v selectables\n", len(selectables))
-		}
+		this.config.GetLogger().Debug("found selectables", "handler", h.Name, "count", len(selectables))
 		match := []deviceselectionmodel.Selectable{}
 		for _, selectable := range selectables {
 			if selectable.Device != nil && this.hasAnomalyDetectorAttribute(selectable.Device) {
@@ -224,9 +226,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 				match = append(match, selectable)
 			}
 		}
-		if this.config.Debug {
-			log.Printf("DEBUG: found %v matches and %v sevices\n", len(match), len(serviceIds))
-		}
+		this.config.GetLogger().Debug("found matches", "handler", h.Name, "match-count", len(match), "service-count", len(serviceIds))
 		entry, err := this.createRouterEntry(h, match, protocols)
 		if err != nil {
 			return nil, err
@@ -239,7 +239,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 func (this *Controller) createRouterEntry(h handler.Entry, match []deviceselectionmodel.Selectable, protocols map[string]models.Protocol) (HandlerInfo, error) {
 	aspectNode, err, _ := this.deviceRepoClient.GetAspectNode(h.Aspect)
 	if err != nil {
-		log.Println("ERROR: unable to GetAspectNode", err)
+		this.config.GetLogger().Error("unable to GetAspectNode", "error", err)
 		return HandlerInfo{}, err
 	}
 	return HandlerInfo{

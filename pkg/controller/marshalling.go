@@ -19,9 +19,9 @@ package controller
 import (
 	"errors"
 	"fmt"
+
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
 	"github.com/SENERGY-Platform/device-selection/pkg/model/devicemodel"
-	"log"
 )
 
 func (this *HandlerInfo) marshal(rawValue map[string]interface{}, service devicemodel.Service) (value interface{}, err error) {
@@ -31,7 +31,7 @@ func (this *HandlerInfo) marshal(rawValue map[string]interface{}, service device
 	}
 	paths := this.marshaller.GetOutputPaths(service, this.handler.Function, &this.aspectNode)
 	if len(paths) > 1 {
-		log.Println("WARNING: only first path found by FunctionId and AspectNode is used for Unmarshal:", service.Id, paths)
+		this.config.GetLogger().Warn("only first path found by FunctionId and AspectNode is used for Unmarshal", "service_id", service.Id, "paths", paths)
 	}
 	if len(paths) == 0 {
 		return value, errors.New("no output path found for criteria")

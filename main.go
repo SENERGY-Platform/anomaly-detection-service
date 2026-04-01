@@ -19,13 +19,15 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/SENERGY-Platform/anomaly-detection-service/pkg"
-	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"github.com/SENERGY-Platform/anomaly-detection-service/pkg"
+	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
 )
 
 func main() {
@@ -34,6 +36,7 @@ func main() {
 
 	conf, err := configuration.Load(*configLocation)
 	if err != nil {
+		slog.Error("unable to load config", "error", err)
 		log.Fatal("ERROR: unable to load config", err)
 	}
 
@@ -48,7 +51,7 @@ func main() {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 	sig := <-shutdown
-	log.Println("received shutdown signal", sig)
+	conf.GetLogger().Info("received shutdown signal", "signal", sig)
 	cancel()
 	wg.Wait() //wait for clean disconnects
 }

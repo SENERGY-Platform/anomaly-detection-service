@@ -16,7 +16,9 @@
 
 package handler
 
-import "log"
+import (
+	"log/slog"
+)
 
 func init() {
 	/* Get Electricity Consumption, Electricity-->Total Subaspect, kWh */
@@ -36,9 +38,9 @@ func (this JumpBackHandler) Handle(context Context, values []interface{}) (anoma
 	if err != nil {
 		return false, "", err
 	}
-	log.Println("Values:", castValues)
+	slog.Debug("JumpBackHandler.Handle", "castValues", castValues)
 	if castValues[1] < castValues[0] {
-		log.Println("Meter reading jumped back.")
+		slog.Info("Meter reading jumped back.", "castValues", castValues)
 		return true, "Meter reading jumped back.", nil
 	}
 	return false, "", nil

@@ -19,15 +19,17 @@ package consumer
 import (
 	"context"
 	"errors"
-	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
-	"github.com/segmentio/kafka-go"
+	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net"
-	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
+	"github.com/segmentio/kafka-go"
 )
 
 func StartKafkaLastOffsetConsumerGroup(ctx context.Context, wg *sync.WaitGroup, broker string, groupId string, topics []string, listener func(msg model.ConsumerMessage) error, errhandler func(topic string, err error)) error {
@@ -35,10 +37,13 @@ func StartKafkaLastOffsetConsumerGroup(ctx context.Context, wg *sync.WaitGroup, 
 		return nil
 	}
 	if len(topics) > 20 {
-		log.Println("consume:", len(topics), "topics")
+		slog.Info("consume", "topic-count", len(topics))
 	} else {
-		log.Println("consume:", topics)
+		slog.Info("consume", "topics", fmt.Sprintf("%#v", topics))
 	}
+
+	kafkaErrorLogger := slog.NewLogLogger(slog.Default().Handler(), slog.LevelError)
+	kafkaErrorLogger.SetPrefix("[KAFKA-ERROR] ")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
 		StartOffset:            kafka.LastOffset,
@@ -48,7 +53,7 @@ func StartKafkaLastOffsetConsumerGroup(ctx context.Context, wg *sync.WaitGroup, 
 		GroupID:                groupId,
 		GroupTopics:            topics,
 		Logger:                 log.New(io.Discard, "", 0),
-		ErrorLogger:            log.New(os.Stdout, "[KAFKA-ERROR] ", log.Default().Flags()),
+		ErrorLogger:            kafkaErrorLogger,
 		WatchPartitionChanges:  true,
 		PartitionWatchInterval: time.Minute,
 	})
@@ -59,9 +64,9 @@ func StartKafkaLastOffsetConsumerGroup(ctx context.Context, wg *sync.WaitGroup, 
 		defer r.Close()
 		defer func() {
 			if len(topics) > 20 {
-				log.Println("close consumer for", len(topics), "topics")
+				slog.Info("close consumer", "topic-count", len(topics))
 			} else {
-				log.Println("close consumer for topics ", topics)
+				slog.Info("close consumer", "topics", fmt.Sprintf("%#v", topics))
 			}
 		}()
 		for {
@@ -70,12 +75,12 @@ func StartKafkaLastOffsetConsumerGroup(ctx context.Context, wg *sync.WaitGroup, 
 				return
 			default:
 				m, err := r.FetchMessage(ctx)
-				if err == io.EOF || err == context.Canceled {
+				if err == io.EOF || errors.Is(err, context.Canceled) {
 					return
 				}
 				topic := m.Topic
 				if err != nil {
-					log.Println("ERROR: while consuming topic ", topic, err)
+					slog.Error("ERROR: while consuming topic", "topic", topic, "error", err)
 					errhandler(topic, err)
 					return
 				}
@@ -91,7 +96,7 @@ func StartKafkaLastOffsetConsumerGroup(ctx context.Context, wg *sync.WaitGroup, 
 				}, 10*time.Minute)
 
 				if err != nil {
-					log.Println("ERROR: unable to handle message (no commit)", err)
+					slog.Error("ERROR: unable to handle message (no commit)", "topic", topic, "error", err)
 					errhandler(topic, err)
 				} else {
 					err = r.CommitMessages(ctx, m)
@@ -108,10 +113,10 @@ func retry(f func() error, waitProvider func(n int64) time.Duration, timeout tim
 	for i := int64(1); err != nil && time.Since(start) < timeout; i++ {
 		err = f()
 		if err != nil {
-			log.Println("ERROR: kafka listener error:", err)
+			slog.Error("ERROR: kafka listener error", "error", err)
 			wait := waitProvider(i)
 			if time.Since(start)+wait < timeout {
-				log.Println("ERROR: retry after:", wait.String())
+				slog.Error("ERROR: retry", "wait", wait.String())
 				time.Sleep(wait)
 			} else {
 				return err

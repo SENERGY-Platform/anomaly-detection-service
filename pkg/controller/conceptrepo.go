@@ -19,6 +19,9 @@ package controller
 import (
 	"context"
 	"errors"
+	"sync"
+	"time"
+
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
 	"github.com/SENERGY-Platform/device-repository/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
@@ -26,9 +29,6 @@ import (
 	"github.com/SENERGY-Platform/models/go/models"
 	"github.com/SENERGY-Platform/service-commons/pkg/cache"
 	"github.com/SENERGY-Platform/service-commons/pkg/signal"
-	"log"
-	"sync"
-	"time"
 )
 
 type CachedConceptRepository struct {
@@ -76,7 +76,7 @@ func (this *CachedConceptRepository) GetConceptIdOfFunction(id string) string {
 		return f.ConceptId, err
 	}, cache.NoValidation, this.exp)
 	if err != nil {
-		log.Println("ERROR: unable to get concept of function: " + err.Error())
+		this.config.GetLogger().Error("unable to get concept of function", "error", err)
 		return ""
 	}
 	return cid

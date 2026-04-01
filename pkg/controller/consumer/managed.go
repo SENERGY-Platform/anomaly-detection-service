@@ -19,12 +19,13 @@ package consumer
 import (
 	"context"
 	"errors"
-	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
-	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
-	"log"
+	"fmt"
 	"reflect"
 	"sort"
 	"sync"
+
+	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
+	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
 )
 
 type ManagedKafkaConsumer struct {
@@ -55,7 +56,7 @@ func (this *ManagedKafkaConsumer) Stop() {
 
 func (this *ManagedKafkaConsumer) stop() {
 	if this.cancel != nil {
-		log.Println("stop consumer")
+		this.config.GetLogger().Info("stop consumer")
 		this.cancel()
 		this.cancel = nil
 	}
@@ -75,13 +76,13 @@ func (this *ManagedKafkaConsumer) UpdateTopics(topics []string) (err error) {
 	defer this.mux.Unlock()
 	sort.Strings(this.topics)
 	sort.Strings(topics)
-	if len(topics) <= 20 {
-		log.Println("update consumer topics: ", topics)
+	if len(topics) > 20 {
+		this.config.GetLogger().Info("update consumer", "topic-count", len(topics))
 	} else {
-		log.Println("update consumer topics: ", len(topics))
+		this.config.GetLogger().Info("update consumer", "topics", fmt.Sprintf("%#v", topics))
 	}
 	if !this.stopped && reflect.DeepEqual(this.topics, topics) {
-		log.Println("no topic changes -> continue with current consumer")
+		this.config.GetLogger().Info("no topic changes -> continue with current consumer")
 		return nil
 	}
 	defer func() {
@@ -99,7 +100,7 @@ func (this *ManagedKafkaConsumer) UpdateTopics(topics []string) (err error) {
 		if !this.stopped && this.output != nil {
 			err := this.output(msg)
 			if errors.Is(err, model.ErrWillBeIgnored) {
-				log.Println("WARNING: kafka listener has thrown an error but will not be retried", err)
+				this.config.GetLogger().Warn("kafka listener has thrown an error but will not be retried", "error", err)
 				return nil
 			}
 			return err

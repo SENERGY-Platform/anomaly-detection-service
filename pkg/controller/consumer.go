@@ -20,10 +20,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
-	"log"
 	"sort"
 	"time"
+
+	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
 )
 
 func (this *Controller) updateConsumer(serviceIds []string) error {
@@ -40,7 +40,7 @@ func (this *Controller) HandleConsumerMessage(msg model.ConsumerMessage) (err er
 	err = json.Unmarshal(msg.Message, &event)
 	if err != nil {
 		err = fmt.Errorf("unable to unmarshal event: err=%#v msg=%#v", err.Error(), string(msg.Message))
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to unmarshal event", "error", err, "msg", string(msg.Message))
 		err = errors.Join(err, model.ErrWillBeIgnored)
 		return err
 	}
