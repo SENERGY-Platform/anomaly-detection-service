@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/configuration"
-	"github.com/SENERGY-Platform/device-repository/lib/client"
+	"github.com/SENERGY-Platform/device-repository/v2/lib/client"
 	"github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	marshaller "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/models/go/models"

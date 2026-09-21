@@ -23,8 +23,8 @@ import (
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/controller/anomalystore"
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/handler"
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
-	"github.com/SENERGY-Platform/device-repository/lib/client"
-	deviceselectionmodel "github.com/SENERGY-Platform/device-selection/pkg/model"
+	"github.com/SENERGY-Platform/device-repository/v2/lib/client"
+	deviceselectionmodel "github.com/SENERGY-Platform/device-selection/v2/pkg/model"
 	marshaller "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/models/go/models"
 	"github.com/valkey-io/valkey-go"
@@ -35,7 +35,7 @@ type HandlerInfo struct {
 	handler          handler.Entry
 	match            []deviceselectionmodel.Selectable
 	protocols        map[string]models.Protocol
-	aspectNode       models.AspectNode
+	aspectNodes      []models.AspectNode
 	marshaller       *marshaller.Marshaller
 	valKeyClient     valkey.Client
 	deviceRepoClient client.Interface

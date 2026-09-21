@@ -57,8 +57,10 @@ func Load(location string) (conf Config, err error) {
 	return conf, err
 }
 
-var typeParser = map[reflect.Type]envldr.Parser{
-	reflect.TypeOf([]string{}): listParser,
+var typeParser = []config_hdl.EnvTypeParser{listTypeParser}
+
+func listTypeParser() (reflect.Type, envldr.Parser) {
+	return reflect.TypeOf([]string{}), listParser
 }
 
 func listParser(_ reflect.Type, val string, _ []string, kwParams map[string]string) (interface{}, error) {

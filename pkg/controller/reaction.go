@@ -27,7 +27,7 @@ import (
 	"strconv"
 	"time"
 
-	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
+	devicerepo "github.com/SENERGY-Platform/device-repository/v2/lib/client"
 )
 
 func (this *HandlerInfo) reactToAnomaly(handlerName string, deviceId string, serviceId string, desc string, timestamp int64) (err error) {

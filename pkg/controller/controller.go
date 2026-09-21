@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"slices"
 	"strings"
@@ -30,10 +31,11 @@ import (
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/handler"
 	"github.com/SENERGY-Platform/anomaly-detection-service/pkg/model"
 	"github.com/SENERGY-Platform/converter/lib/converter"
-	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
-	"github.com/SENERGY-Platform/device-selection/pkg/client"
-	deviceselectionmodel "github.com/SENERGY-Platform/device-selection/pkg/model"
+	devicerepo "github.com/SENERGY-Platform/device-repository/v2/lib/client"
+	"github.com/SENERGY-Platform/device-selection/v2/pkg/client"
+	deviceselectionmodel "github.com/SENERGY-Platform/device-selection/v2/pkg/model"
 	marshallerconfig "github.com/SENERGY-Platform/marshaller/lib/config"
+	marshallermodel "github.com/SENERGY-Platform/marshaller/lib/marshaller/model"
 	marshaller "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/models/go/models"
 	"github.com/SENERGY-Platform/service-commons/pkg/cache/invalidator"
@@ -200,7 +202,7 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 			{
 				Interaction: models.EVENT,
 				FunctionId:  h.Function,
-				AspectId:    h.Aspect,
+				AspectIds:   h.GetAspects(),
 			},
 		}, &client.GetSelectablesOptions{
 			IncludeGroups:               false,
@@ -237,9 +239,8 @@ func (this *Controller) LoadRegister(register *handler.Register) (serviceIds []s
 }
 
 func (this *Controller) createRouterEntry(h handler.Entry, match []deviceselectionmodel.Selectable, protocols map[string]models.Protocol) (HandlerInfo, error) {
-	aspectNode, err, _ := this.deviceRepoClient.GetAspectNode(h.Aspect)
+	aspectNodes, err := this.getAspectNodes(h.GetAspects())
 	if err != nil {
-		this.config.GetLogger().Error("unable to GetAspectNode", "error", err)
 		return HandlerInfo{}, err
 	}
 	return HandlerInfo{
@@ -248,11 +249,44 @@ func (this *Controller) createRouterEntry(h handler.Entry, match []deviceselecti
 		match:            match,
 		protocols:        protocols,
 		marshaller:       this.marshaller,
-		aspectNode:       aspectNode,
+		aspectNodes:      aspectNodes,
 		valKeyClient:     this.valKeyClient,
 		deviceRepoClient: this.deviceRepoClient,
 		anomalyStore:     this.anomalyStore,
 	}, nil
+}
+
+// getAspectNodes loads the nodes of the aspects a handler filters by. The nodes have to come
+// from the device-repository and not be built here: the child and descendent ids they carry
+// are what lets an aspect cover its subtree, and a node without them matches only itself.
+//
+// The ids filter of the listing is used rather than the client's GetAspectNodesByIdList: that
+// method posts a bare array while the endpoint it calls expects {"ids": [...]}, so it answers
+// 400 against its own service (device-repository v2.2.1).
+//
+// An aspect that resolves to no node is an error rather than a node that matches nothing,
+// because a handler registered for a misspelled aspect would otherwise silently never run.
+func (this *Controller) getAspectNodes(aspectIds []string) (result []models.AspectNode, err error) {
+	if len(aspectIds) == 0 {
+		return nil, nil
+	}
+	result, _, err, _ = this.deviceRepoClient.ListAspectNodes(devicerepo.AspectListOptions{Ids: aspectIds})
+	if err != nil {
+		this.config.GetLogger().Error("unable to ListAspectNodes", "aspect-ids", aspectIds, "error", err)
+		return nil, err
+	}
+	missing := []string{}
+	for _, aspectId := range aspectIds {
+		if !marshallermodel.ContainsAspectNode(result, aspectId) {
+			missing = append(missing, aspectId)
+		}
+	}
+	if len(missing) > 0 {
+		err = fmt.Errorf("unknown aspect ids: %v", strings.Join(missing, ", "))
+		this.config.GetLogger().Error("unable to get aspect nodes", "aspect-ids", aspectIds, "error", err)
+		return nil, err
+	}
+	return result, nil
 }
 
 func (this *Controller) hasAnomalyDetectorAttribute(device *deviceselectionmodel.PermSearchDevice) bool {
