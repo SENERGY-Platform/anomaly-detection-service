@@ -31,7 +31,7 @@ type Anomaly struct {
 var AnomalyBson = getBsonFieldObject[Anomaly]()
 
 func (this *Mongo) anomalyCollection() *mongo.Collection {
-	return this.client.Database(this.config.MongoTable).Collection(this.config.MongoAnomalyCollection)
+	return this.client.Database(this.config.MongoDatabase).Collection(this.config.MongoAnomalyCollection)
 }
 
 func (this *Mongo) StoreAnomaly(handlerName string, deviceId string, serviceId string, desc string, timestamp int64) error {

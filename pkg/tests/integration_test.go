@@ -532,7 +532,7 @@ func TestIntegration(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		cursor, err := c.Database(config.MongoTable).Collection(config.MongoAnomalyCollection).Find(ctx, bson.D{})
+		cursor, err := c.Database(config.MongoDatabase).Collection(config.MongoAnomalyCollection).Find(ctx, bson.D{})
 		if err != nil {
 			t.Error(err)
 			return

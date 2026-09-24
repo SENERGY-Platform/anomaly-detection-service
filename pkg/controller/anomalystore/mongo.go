@@ -18,6 +18,8 @@ package anomalystore
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"reflect"
 	"runtime/debug"
 	"slices"
@@ -45,9 +47,21 @@ func getTimeoutContext() context.Context {
 }
 
 func New(conf configuration.Config) (*Mongo, error) {
-	c, err := mongo.Connect(getTimeoutContext(), options.Client().ApplyURI(conf.MongoUrl), options.Client().SetReadConcern(readconcern.Majority()))
+	err := validateConfig(conf)
 	if err != nil {
 		return nil, err
+	}
+	c, err := mongo.Connect(getTimeoutContext(), clientOptions(conf))
+	if err != nil {
+		return nil, err
+	}
+	// Connect does not contact the server, and ping succeeds without auth; listCollections needs an authorized user.
+	checkCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_, err = c.Database(conf.MongoDatabase).ListCollectionNames(checkCtx, bson.D{}, options.ListCollections().SetNameOnly(true).SetAuthorizedCollections(true))
+	if err != nil {
+		c.Disconnect(context.Background())
+		return nil, fmt.Errorf("mongo startup check failed: %w", err)
 	}
 	db := &Mongo{config: conf, client: c}
 	for _, creators := range CreateCollections {
@@ -58,6 +72,29 @@ func New(conf configuration.Config) (*Mongo, error) {
 		}
 	}
 	return db, nil
+}
+
+func validateConfig(conf configuration.Config) error {
+	if strings.TrimSpace(conf.MongoDatabase) == "" {
+		return errors.New("MONGO_DATABASE must not be empty")
+	}
+	if conf.MongoUser != "" && conf.MongoPassword.Value() == "" {
+		return errors.New("MONGO_PASSWORD must not be empty when MONGO_USER is set")
+	}
+	return nil
+}
+
+// clientOptions sets credentials only when MongoUser is given; they replace any credentials embedded in MongoUrl.
+func clientOptions(conf configuration.Config) *options.ClientOptions {
+	opts := options.Client().ApplyURI(conf.MongoUrl).SetReadConcern(readconcern.Majority())
+	if conf.MongoUser != "" {
+		opts.SetAuth(options.Credential{
+			Username:   conf.MongoUser,
+			Password:   conf.MongoPassword.Value(),
+			AuthSource: conf.MongoAuthSource,
+		})
+	}
+	return opts
 }
 
 func (this *Mongo) Disconnect() {
