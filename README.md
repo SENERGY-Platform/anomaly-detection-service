@@ -7,6 +7,8 @@ Hand-written notes on this service live in [docs/](docs/):
 
 - [Aspects arrive as a list](docs/aspects-arrive-as-a-list.md) — registering a handler for one
   or several aspects, and what the deprecated single aspect id still guarantees.
+- [How big_jump and jump_back decide](docs/big-jump-and-jump-back.md) — the time-based test for
+  big jumps, its limits and the alternatives that were rejected, and when a jump back is reported.
 
 ## MongoDB configuration
 
