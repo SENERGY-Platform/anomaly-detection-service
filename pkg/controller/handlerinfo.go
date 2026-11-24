@@ -28,6 +28,7 @@ import (
 	marshaller "github.com/SENERGY-Platform/marshaller/lib/marshaller/v2"
 	"github.com/SENERGY-Platform/models/go/models"
 	"github.com/valkey-io/valkey-go"
+	"time"
 )
 
 type HandlerInfo struct {
@@ -56,7 +57,7 @@ func (this *HandlerInfo) Send(msg model.EventMessageWithTimestamp) error {
 	return nil
 }
 
-func (this *HandlerInfo) do(deviceId string, service models.Service, rawValue map[string]interface{}, timestamp int64) error {
+func (this *HandlerInfo) do(deviceId string, service models.Service, rawValue map[string]interface{}, timestamp time.Time) error {
 	marshalledValue, err := this.marshal(rawValue, service)
 	if err != nil {
 		return errors.Join(fmt.Errorf("unable to marshal"), err, model.ErrWillBeIgnored)
@@ -72,12 +73,13 @@ func (this *HandlerInfo) do(deviceId string, service models.Service, rawValue ma
 		DeviceId:  deviceId,
 		ServiceId: service.Id,
 		Store:     &Store{ValKeyClient: this.valKeyClient},
+		Time:      timestamp,
 	}, list)
 	if err != nil {
 		return errors.Join(fmt.Errorf("unable to handle"), err, model.ErrWillBeIgnored)
 	}
 	if anomaly {
-		err = this.reactToAnomaly(this.handler.Name, deviceId, service.Id, desc, timestamp)
+		err = this.reactToAnomaly(this.handler.Name, deviceId, service.Id, desc, timestamp.Unix())
 		if err != nil {
 			return errors.Join(fmt.Errorf("unable to react to anomaly"), err, model.ErrWillBeIgnored)
 		}

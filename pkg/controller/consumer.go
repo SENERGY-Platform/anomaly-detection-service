@@ -48,8 +48,9 @@ func (this *Controller) HandleConsumerMessage(msg model.ConsumerMessage) (err er
 		EventMessage: event,
 		Timestamp:    msg.Timestamp,
 	}
-	if eventWithTimestamp.Timestamp == 0 {
-		eventWithTimestamp.Timestamp = time.Now().Unix()
+	//no usable timestamp: the zero time, the unix epoch or before
+	if eventWithTimestamp.Timestamp.Unix() <= 0 {
+		eventWithTimestamp.Timestamp = time.Now()
 	}
 	return this.Send(eventWithTimestamp)
 }

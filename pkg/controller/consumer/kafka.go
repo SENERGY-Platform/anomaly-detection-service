@@ -89,7 +89,7 @@ func StartKafkaLastOffsetConsumerGroup(ctx context.Context, wg *sync.WaitGroup, 
 					return listener(model.ConsumerMessage{
 						Topic:     topic,
 						Message:   m.Value,
-						Timestamp: m.Time.Unix(),
+						Timestamp: m.Time,
 					})
 				}, func(n int64) time.Duration {
 					return time.Duration(n) * time.Second

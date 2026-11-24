@@ -16,7 +16,10 @@
 
 package handler
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Handler interface {
 	// Handle
@@ -32,6 +35,8 @@ type Context struct {
 	DeviceId  string
 	ServiceId string
 	Store     Store
+	// Time is when the platform received the newest value, not when the device measured it
+	Time time.Time
 }
 
 func (this Context) PrepareKey(handlerName string, subKey string) string {

@@ -19,11 +19,12 @@ package model
 import (
 	"errors"
 	"strings"
+	"time"
 )
 
 type EventMessageWithTimestamp struct {
 	EventMessage
-	Timestamp int64
+	Timestamp time.Time
 }
 
 type EventMessage struct {
@@ -33,9 +34,9 @@ type EventMessage struct {
 }
 
 type ConsumerMessage struct {
-	Topic     string `json:"topic"`
-	Message   []byte `json:"message"`
-	Timestamp int64  `json:"timestamp"`
+	Topic     string    `json:"topic"`
+	Message   []byte    `json:"message"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 var ErrWithRetry = errors.New("will be retried")
