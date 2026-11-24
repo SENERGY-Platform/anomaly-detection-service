@@ -32,7 +32,7 @@ func TestJumpBackHandler_Handle(t *testing.T) {
 		{
 			name: "const_meter_reading",
 			args: args{
-				values: []interface{}{1253.8, 1253.8},
+				values: []interface{}{1253.8, 1253.8, 1253.8},
 			},
 			wantAnomaly:     false,
 			wantDescription: "",
@@ -41,19 +41,56 @@ func TestJumpBackHandler_Handle(t *testing.T) {
 		{
 			name: "increasing_meter_reading",
 			args: args{
-				values: []interface{}{1253.8, 1253.9},
+				values: []interface{}{1253.8, 1253.9, 1254.0},
 			},
 			wantAnomaly:     false,
 			wantDescription: "",
 			wantErr:         false,
 		},
 		{
-			name: "decreasing_meter_reading",
+			name: "drop_confirmed_by_next_value_is_reported",
 			args: args{
-				values: []interface{}{1253.8, 1253.7},
+				values: []interface{}{1253.8, 1253.7, 1253.75},
 			},
 			wantAnomaly:     true,
 			wantDescription: "Meter reading jumped back.",
+			wantErr:         false,
+		},
+		{
+			name: "reset_to_zero_is_reported",
+			args: args{
+				values: []interface{}{33.498, 0.0, 0.001},
+			},
+			wantAnomaly:     true,
+			wantDescription: "Meter reading jumped back.",
+			wantErr:         false,
+		},
+		{
+			// observed on a plug: 7.445 and 7.446 were processed in swapped order
+			name: "value_delivered_out_of_order_is_not_reported",
+			args: args{
+				values: []interface{}{7.446, 7.445, 7.447},
+			},
+			wantAnomaly:     false,
+			wantDescription: "",
+			wantErr:         false,
+		},
+		{
+			name: "drop_followed_by_previous_level_is_not_reported",
+			args: args{
+				values: []interface{}{7.446, 7.445, 7.446},
+			},
+			wantAnomaly:     false,
+			wantDescription: "",
+			wantErr:         false,
+		},
+		{
+			name: "drop_in_newest_value_waits_for_the_next_value",
+			args: args{
+				values: []interface{}{7.444, 7.446, 7.445},
+			},
+			wantAnomaly:     false,
+			wantDescription: "",
 			wantErr:         false,
 		},
 	}

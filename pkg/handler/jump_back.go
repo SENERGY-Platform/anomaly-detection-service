@@ -22,14 +22,19 @@ import (
 
 func init() {
 	/* Get Energy, Total, kWh */
-	Registry.Register("jump_back_anom_electricity_consumption_total_kwh", "urn:infai:ses:measuring-function:474471c3-e401-4b54-8963-53739a3b1de4", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", 2, JumpBackHandler{})
+	Registry.Register("jump_back_anom_electricity_consumption_total_kwh", "urn:infai:ses:measuring-function:474471c3-e401-4b54-8963-53739a3b1de4", "urn:infai:ses:aspect:fdc999eb-d366-44e8-9d24-bfd48d5fece1", "urn:infai:ses:characteristic:3febed55-ba9b-43dc-8709-9c73bae3716e", jumpBackBufferSize, JumpBackHandler{})
 
 	/* Get Volume, Water, Liter */
-	Registry.Register("jump_back_anom_volume_water_liter", "urn:infai:ses:measuring-function:f5344662-63d2-40b7-9b9e-0b28a2d34252", "urn:infai:ses:aspect:b8b3b549-3b01-4604-a727-20aa528c21c9", "urn:infai:ses:characteristic:aeb260f8-5fe5-4989-9e66-3c0a4ff273c4", 2, JumpBackHandler{})
+	Registry.Register("jump_back_anom_volume_water_liter", "urn:infai:ses:measuring-function:f5344662-63d2-40b7-9b9e-0b28a2d34252", "urn:infai:ses:aspect:b8b3b549-3b01-4604-a727-20aa528c21c9", "urn:infai:ses:characteristic:aeb260f8-5fe5-4989-9e66-3c0a4ff273c4", jumpBackBufferSize, JumpBackHandler{})
 
 	/* Get Volume, Gas, Liter */
-	Registry.Register("jump_back_anom_consumption_gas_liter", "urn:infai:ses:measuring-function:f5344662-63d2-40b7-9b9e-0b28a2d34252", "urn:infai:ses:aspect:7ea324c1-48e4-419a-a499-325d79dac09f", "urn:infai:ses:characteristic:aeb260f8-5fe5-4989-9e66-3c0a4ff273c4", 2, JumpBackHandler{})
+	Registry.Register("jump_back_anom_consumption_gas_liter", "urn:infai:ses:measuring-function:f5344662-63d2-40b7-9b9e-0b28a2d34252", "urn:infai:ses:aspect:7ea324c1-48e4-419a-a499-325d79dac09f", "urn:infai:ses:characteristic:aeb260f8-5fe5-4989-9e66-3c0a4ff273c4", jumpBackBufferSize, JumpBackHandler{})
 }
+
+// jumpBackBufferSize is three because a drop between the two older values is only reported
+// once the newest value confirms it. A value processed out of order is followed by one at or
+// above the level before the drop again; after a reset, the meter stays below that level.
+const jumpBackBufferSize = 3
 
 type JumpBackHandler struct{}
 
@@ -39,7 +44,8 @@ func (this JumpBackHandler) Handle(context Context, values []interface{}) (anoma
 		return false, "", err
 	}
 	slog.Debug("JumpBackHandler.Handle", "castValues", castValues)
-	if castValues[1] < castValues[0] {
+	before, dropped, next := castValues[0], castValues[1], castValues[2]
+	if dropped < before && next < before {
 		slog.Info("Meter reading jumped back.", "castValues", castValues)
 		return true, "Meter reading jumped back.", nil
 	}
